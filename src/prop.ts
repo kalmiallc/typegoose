@@ -2,7 +2,7 @@ import * as mongoose from 'mongoose';
 import * as _ from 'lodash';
 
 import { schema, virtuals } from './data';
-import { isPrimitive, initAsObject, initAsArray, isString, isNumber, isObject } from './utils';
+import { isPrimitive, isMongoose, initAsObject, initAsArray, isString, isNumber, isObject } from './utils';
 import { InvalidPropError, NotNumberTypeError, NotStringTypeError, NoMetadataError } from './errors';
 
 export type Func = (...args: any[]) => any;
@@ -118,12 +118,12 @@ const baseProp = (rawOptions, Type, target, key, isArray = false) => {
 
   const instance = new Type();
   const subSchema = schema[instance.constructor.name];
-  if (!subSchema && !isPrimitive(Type) && !isObject(Type)) {
+  if (!subSchema && (!isPrimitive(Type) || isMongoose(Type)) && !isObject(Type)) {
       throw new InvalidPropError(Type.name, key);
   }
 
   const options = _.omit(rawOptions, ['ref', 'items']);
-  if (isPrimitive(Type)) {
+  if (isPrimitive(Type) || isMongoose(Type)) {
     if (isArray) {
       schema[name][key][0] = {
         ...schema[name][key][0],
