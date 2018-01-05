@@ -6,6 +6,8 @@ export interface BasePropOptions {
     default?: any;
     unique?: boolean;
     index?: boolean;
+    sparse?: boolean;
+    expires?: string | number;
 }
 export interface PropOptions extends BasePropOptions {
     ref?: any;

@@ -15,6 +15,8 @@ export declare class User extends Typegoose {
     fullName: string;
     nick?: string;
     uniqueId?: string;
+    username?: string;
+    expireAt?: Date;
     age?: number;
     gender: Gender;
     role: Role;
