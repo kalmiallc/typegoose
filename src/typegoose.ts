@@ -13,48 +13,33 @@ export { getClassForDocument } from './utils';
 export type InstanceType<T> = T & mongoose.Document;
 export type ModelType<T> = mongoose.Model<InstanceType<T>> & T;
 
-export interface ExtraOptions {
-  onSchemaCreate: (scehma: mongoose.Schema) => mongoose.Schema;
-}
-
 export interface GetModelForClassOptions {
   existingMongoose?: mongoose.Mongoose;
   schemaOptions?: mongoose.SchemaOptions;
   existingConnection?: mongoose.Connection;
-  extraOptions?: ExtraOptions;
 }
 
 export class Typegoose {
-  getModelForClass<T>(t: T, {
-    existingMongoose,
-    schemaOptions,
-    existingConnection,
-    extraOptions,
-  }: GetModelForClassOptions = {}) {
+  getModelForClass<T>(t: T, { existingMongoose, schemaOptions, existingConnection }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
     if (!models[name]) {
-      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection, extraOptions });
+      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection });
     }
 
     return models[name] as ModelType<this> & T;
   }
 
-  setModelForClass<T>(t: T, {
-    existingMongoose,
-    schemaOptions,
-    existingConnection,
-    extraOptions,
-  }: GetModelForClassOptions = {}) {
+  setModelForClass<T>(t: T, { existingMongoose, schemaOptions, existingConnection }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
 
     // get schema of current model
-    let sch = this.buildSchema(name, schemaOptions, void 0, extraOptions);
+    let sch = this.buildSchema(name, schemaOptions);
     // get parents class name
     let parentCtor = Object.getPrototypeOf(this.constructor.prototype).constructor;
     // iterate trough all parents
     while (parentCtor && parentCtor.name !== 'Typegoose' && parentCtor.name !== 'Object') {
       // extend schema
-      sch = this.buildSchema(parentCtor.name, schemaOptions, sch, extraOptions);
+      sch = this.buildSchema(parentCtor.name, schemaOptions, sch);
       // next parent
       parentCtor = Object.getPrototypeOf(parentCtor.prototype).constructor;
     }
@@ -72,7 +57,7 @@ export class Typegoose {
     return models[name] as ModelType<this> & T;
   }
 
-  private buildSchema(name: string, schemaOptions, sch?: mongoose.Schema, extraOptions?: ExtraOptions) {
+  private buildSchema(name: string, schemaOptions, sch?: mongoose.Schema) {
     const Schema = mongoose.Schema;
 
     if (!sch) {
@@ -81,12 +66,6 @@ export class Typegoose {
         new Schema(schema[name]);
     } else {
       sch.add(schema[name]);
-    }
-
-    if (extraOptions) {
-      if (extraOptions.onSchemaCreate) {
-        sch = extraOptions.onSchemaCreate(sch);
-      }
     }
 
     const staticMethods = methods.staticMethods[name];
