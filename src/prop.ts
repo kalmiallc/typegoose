@@ -9,6 +9,8 @@ export type Func = (...args: any[]) => any;
 
 export type RequiredType = boolean | [boolean, string] | string | Func | [Func, string];
 
+export type ValidateFunction = (value: any) => boolean;
+
 export interface BasePropOptions {
   required?: RequiredType;
   enum?: string[] | object;
@@ -17,6 +19,7 @@ export interface BasePropOptions {
   index?: boolean;
   sparse?: boolean;
   expires?: string | number;
+  validate?: RegExp | ValidateFunction;
 }
 
 export interface PropOptions extends BasePropOptions {
